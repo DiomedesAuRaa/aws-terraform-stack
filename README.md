@@ -1,27 +1,26 @@
-# AWS Infrastructure with Terraform
+# AWS Terraform Deployment
 
-This repository contains Terraform configurations for deploying both an **EKS cluster** and an **EC2 instance** on AWS using modular infrastructure.
+This repository contains Terraform configurations for deploying:
 
-## Repository Structure
-
-```
-.
-├── eks/          # Terraform configuration for EKS cluster
-├── ec2/          # Terraform configuration for EC2 instance
-├── modules/      # Shared Terraform modules
-├── environments/ # Environment-specific configurations
-└── README.md
-```
+- Amazon EKS (Kubernetes)
+- Amazon EC2 (Virtual Machines)
+- Amazon RDS (Databases)
+- Amazon S3 (Storage)
+- Amazon ECS (Elastic Container Service)
+- AWS Lambda (Serverless Functions)
 
 ## Prerequisites
 - Install [Terraform](https://developer.hashicorp.com/terraform/downloads)
-- Configure your AWS credentials (see instructions in each subdirectory's README)
-- Ensure you have the necessary AWS permissions to create EKS and EC2 resources
+- Install [AWS CLI](https://aws.amazon.com/cli/)
+- Configure AWS credentials:
+  ```sh
+  aws configure
+  ```
 
-## Deploying EKS Cluster
-1. Navigate to the EKS directory:
+## Deploying All Services
+1. Navigate to the environment (`dev` or `prod`):
    ```sh
-   cd eks
+   cd environments/dev
    ```
 2. Initialize Terraform:
    ```sh
@@ -31,31 +30,22 @@ This repository contains Terraform configurations for deploying both an **EKS cl
    ```sh
    terraform apply -auto-approve
    ```
-4. Once complete, Terraform will output the cluster name and other details.
+4. The output will display service details.
 
-## Deploying EC2 Instance
-1. Navigate to the EC2 directory:
-   ```sh
-   cd ec2
-   ```
-2. Initialize Terraform:
-   ```sh
-   terraform init
-   ```
-3. Apply the configuration:
-   ```sh
-   terraform apply -auto-approve
-   ```
-4. The instance ID and public IP will be displayed upon successful deployment.
+## Selective Module Deployment
+To enable or disable specific modules, pass the appropriate variables. For example, to only deploy EKS and S3:
+```sh
+terraform apply \
+  -var="enable_eks=true" \
+  -var="enable_ec2=false" \
+  -var="enable_rds=false" \
+  -var="enable_s3=true" \
+  -var="enable_ecs=false" \
+  -var="enable_lambda=false"
+```
 
-## Cleaning Up Resources
-To destroy resources when no longer needed:
+## Destroying Resources
 ```sh
 terraform destroy -auto-approve
 ```
-Run this command from either `eks/` or `ec2/` depending on what you want to remove.
-
----
-
-For more details on each module, refer to their respective README files inside `eks/` and `ec2/`.
-
+Run this in the environment directory.

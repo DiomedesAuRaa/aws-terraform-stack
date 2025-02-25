@@ -60,7 +60,7 @@ jobs:
 
       # Optionally, upload the plan as an artifact for review
       - name: Upload Terraform Plan
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: tfplan-${{ matrix.directory }}
           path: ./${{ matrix.directory }}/tfplan

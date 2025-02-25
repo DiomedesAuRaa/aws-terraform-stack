@@ -1,14 +1,13 @@
 data "aws_subnets" "supported_subnets" {
   filter {
     name   = "availability-zone"
-    values = ["us-east-1a", "us-east-1b", "us-east-1c"] # Replace with AZs where your instance type is supported
+    values = ["us-east-1a", "us-east-1b", "us-east-1c"]
   }
   filter {
     name   = "vpc-id"
-    values = [var.vpc_id] # Ensure the subnets belong to the correct VPC
+    values = [var.vpc_id] 
   }
 }
-
 # Filter the public subnets to include only those in supported AZs
 locals {
   supported_public_subnets = [
@@ -34,7 +33,7 @@ resource "aws_autoscaling_group" "ec2_asg" {
   min_size            = var.min_size
   max_size            = var.max_size
   desired_capacity    = var.desired_capacity
-  vpc_zone_identifier = data.aws_subnets.supported_subnets.ids
+  vpc_zone_identifier = local.supported_public_subnets
 
   launch_template {
     id      = aws_launch_template.ec2_template.id

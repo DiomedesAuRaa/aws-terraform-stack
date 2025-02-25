@@ -128,4 +128,6 @@ To delete the S3 bucket and other resources:
 terraform destroy
 ```
 
+# TODO
+- I'm currently using a bunch of depracted modules that need to be upgraded. 
 ---

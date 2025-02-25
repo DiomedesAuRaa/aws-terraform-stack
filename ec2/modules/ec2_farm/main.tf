@@ -1,54 +1,31 @@
-# Declare the instance_type variable
-variable "instance_type" {
-  description = "The type of EC2 instance to launch"
-  type        = string
-  default     = "t3.medium"  # Optional: Provide a default value
-}
-
-# Data source to fetch subnets in supported AZs
 data "aws_subnets" "supported_subnets" {
   filter {
     name   = "availability-zone"
-    values = ["us-east-1a", "us-east-1b", "us-east-1c"]  # Replace with AZs where your instance type is supported
+    values = ["us-east-1a", "us-east-1b", "us-east-1c"] # Replace with AZs where your instance type is supported
+  }
+  filter {
+    name   = "vpc-id"
+    values = [var.vpc_id] # Ensure the subnets belong to the correct VPC
   }
 }
 
-# Data source to fetch the VPC ID of the subnets
-data "aws_subnet" "example" {
-  id = data.aws_subnets.supported_subnets.ids[0]  # Use the first subnet to get the VPC ID
+# Filter the public subnets to include only those in supported AZs
+locals {
+  supported_public_subnets = [
+    for subnet in var.public_subnets : subnet
+    if contains(data.aws_subnets.supported_subnets.ids, subnet)
+  ]
 }
 
-# Security Group (ensure it is in the same VPC as the subnets)
-resource "aws_security_group" "ec2_sg" {
-  name_prefix = "ec2-farm-sg"
-  vpc_id      = data.aws_subnet.example.vpc_id
-
-  # Add your ingress/egress rules here
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-# Launch Template
 resource "aws_launch_template" "ec2_template" {
   name_prefix   = "ec2-farm"
-  image_id      = "ami-0062355a529d6089c"  # Replace with your desired AMI ID
-  instance_type = var.instance_type  # Use the declared variable
-  key_name      = "my-key"  # Replace with your key pair name
+  image_id      = "ami-0062355a529d6089c" # Replace with your desired AMI ID
+  instance_type = var.instance_type       # Use the instance type passed from the root module
+  key_name      = "my-key"                # Replace with your key pair name
 
   network_interfaces {
     associate_public_ip_address = true
-    security_groups             = [aws_security_group.ec2_sg.id]  # Use the security group created above
+    security_groups             = [var.security_group_id] # Use the security group ID passed from the root module
   }
 }
 
@@ -57,7 +34,7 @@ resource "aws_autoscaling_group" "ec2_asg" {
   min_size            = var.min_size
   max_size            = var.max_size
   desired_capacity    = var.desired_capacity
-  vpc_zone_identifier = data.aws_subnets.supported_subnets.ids  # Use dynamically filtered subnets
+  vpc_zone_identifier = data.aws_subnets.supported_subnets.ids
 
   launch_template {
     id      = aws_launch_template.ec2_template.id

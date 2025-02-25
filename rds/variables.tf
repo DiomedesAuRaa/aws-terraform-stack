@@ -25,7 +25,7 @@ variable "private_subnet_cidr" {
 variable "private_subnet_cidr_2" {
   description = "The CIDR block for the second private subnet"
   type        = string
-  default     = "10.0.3.0/24"  # Define this CIDR block as needed
+  default     = "10.0.3.0/24" # Define this CIDR block as needed
 }
 
 variable "db_instance_identifier" {

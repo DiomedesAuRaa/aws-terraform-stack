@@ -1,10 +1,10 @@
 provider "aws" {
-  region = "us-east-1" 
+  region = "us-east-1"
 }
 
 resource "aws_s3_bucket" "my_bucket" {
   bucket = "tactus-au-rath"
-  acl = "private"
+  acl    = "private"
 
   server_side_encryption_configuration {
     rule {
@@ -19,7 +19,7 @@ resource "aws_s3_bucket" "my_bucket" {
   }
 
   lifecycle {
-    prevent_destroy = true 
+    prevent_destroy = true
   }
 }
 

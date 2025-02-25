@@ -4,8 +4,8 @@ provider "aws" {
 
 # Create VPC
 resource "aws_vpc" "main" {
-  cidr_block = "10.0.0.0/16"
-  enable_dns_support = true
+  cidr_block           = "10.0.0.0/16"
+  enable_dns_support   = true
   enable_dns_hostnames = true
   tags = {
     Name = "main-vpc"
@@ -80,8 +80,8 @@ resource "aws_ecs_service" "my_service" {
   launch_type = "FARGATE"
 
   network_configuration {
-    subnets          = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]  # Reference directly
-    security_groups = [aws_security_group.ecs_sg.id]
+    subnets          = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id] # Reference directly
+    security_groups  = [aws_security_group.ecs_sg.id]
     assign_public_ip = true
   }
 }
@@ -91,12 +91,12 @@ resource "aws_sns_topic" "alerts" {
 }
 
 module "cloudwatch" {
-  source               = "./modules/cloudwatch"
-  alarm_name           = "high_log_frequency_alarm"
-  metric_name          = "LogEventCount"
-  threshold            = 10
-  evaluation_period    = 1
-  period               = 60
-  sns_topic_arn        = aws_sns_topic.alerts.arn  
-  log_group_name       = "my-log-group"
+  source            = "./modules/cloudwatch"
+  alarm_name        = "high_log_frequency_alarm"
+  metric_name       = "LogEventCount"
+  threshold         = 10
+  evaluation_period = 1
+  period            = 60
+  sns_topic_arn     = aws_sns_topic.alerts.arn
+  log_group_name    = "my-log-group"
 }

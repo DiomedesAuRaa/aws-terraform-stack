@@ -4,8 +4,8 @@ provider "aws" {
 
 # 🚀 Create a VPC
 resource "aws_vpc" "main_vpc" {
-  cidr_block = var.vpc_cidr_block
-  enable_dns_support = true
+  cidr_block           = var.vpc_cidr_block
+  enable_dns_support   = true
   enable_dns_hostnames = true
 
   tags = {
@@ -121,10 +121,10 @@ resource "aws_db_instance" "production_db" {
   storage_type      = var.db_storage_type
 
   backup_retention_period = 7
-  multi_az               = true
-  storage_encrypted      = true
-  deletion_protection    = false
-  publicly_accessible    = false
+  multi_az                = true
+  storage_encrypted       = true
+  deletion_protection     = false
+  publicly_accessible     = false
   # final_snapshot_identifier = "production-db-final-snapshot"
   skip_final_snapshot = true
 
@@ -138,7 +138,7 @@ resource "aws_db_instance" "production_db" {
 
 # 🚀 Create a subnet group for RDS across two AZs
 resource "aws_db_subnet_group" "rds_subnet_group" {
-  name       = "rds-subnet-group"
+  name = "rds-subnet-group"
   subnet_ids = [
     aws_subnet.private_subnet.id,
     aws_subnet.private_subnet_2.id

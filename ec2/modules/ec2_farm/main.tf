@@ -8,13 +8,6 @@ data "aws_subnets" "supported_subnets" {
     values = [var.vpc_id] 
   }
 }
-# Filter the public subnets to include only those in supported AZs
-locals {
-  supported_public_subnets = [
-    for subnet in var.public_subnets : subnet
-    if contains(data.aws_subnets.supported_subnets.ids, subnet)
-  ]
-}
 
 resource "aws_launch_template" "ec2_template" {
   name_prefix   = "ec2-farm"
@@ -33,7 +26,7 @@ resource "aws_autoscaling_group" "ec2_asg" {
   min_size            = var.min_size
   max_size            = var.max_size
   desired_capacity    = var.desired_capacity
-  vpc_zone_identifier = local.supported_public_subnets
+  vpc_zone_identifier = var.public_subnets
 
   launch_template {
     id      = aws_launch_template.ec2_template.id

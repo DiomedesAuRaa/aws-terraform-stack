@@ -1,10 +1,12 @@
 # Ignore all .sh scripts 
 *.sh
+
 # Terraform state files
 *.tfstate
 *.tfstate.backup
 terraform.tfstate.d/
 .terraform.tfstate.lock.info
+
 # Terraform crash logs
 crash.log
 

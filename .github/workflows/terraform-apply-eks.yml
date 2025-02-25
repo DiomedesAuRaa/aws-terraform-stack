@@ -60,7 +60,7 @@ jobs:
 
       - name: Terraform Plan
         working-directory: aws-terraform-stack/eks
-        run: terraform plan -out=tfplan
+        run: terraform plan -lock=false -out=tfplan
 
       - name: Show Terraform Plan Output (Debugging)
         if: failure()  # Only runs if the previous step fails

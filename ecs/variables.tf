@@ -5,7 +5,7 @@ variable "region" {
 
 variable "ecs_cluster_name" {
   description = "The name of the ECS cluster."
-  default     = "cassius-au-bellona"
+  default     = "cassius-au-bellona-test"
 }
 
 variable "ecs_task_family" {

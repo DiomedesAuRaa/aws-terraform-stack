@@ -130,4 +130,5 @@ terraform destroy
 
 # TODO
 - I'm currently using a bunch of depracted modules that need to be upgraded. 
+- Also I have locks off cause this isn't an important bucket, but that should get added. 
 ---

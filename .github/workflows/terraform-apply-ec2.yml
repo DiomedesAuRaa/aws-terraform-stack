@@ -73,6 +73,15 @@ jobs:
         run: terraform apply -lock=false tfplan 
         if: success()  # Only runs if terraform plan was successful
 
+      - name: Terraform Plan - 2 (BAD PRACTICE)
+        working-directory: aws-terraform-stack/ec2
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply - 2 (BAD PRACTICE)
+        working-directory: aws-terraform-stack/ec2
+        run: terraform apply -lock=false tfplan 
+        if: success()  # Only runs if terraform plan was successful
+
       # Discord Notifications
       - name: Notify Discord on Success
         if: success()

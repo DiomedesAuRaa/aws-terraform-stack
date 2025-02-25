@@ -1,6 +1,5 @@
 # Ignore all .sh scripts 
 *.sh
-
 # Terraform state files
 *.tfstate
 *.tfstate.backup

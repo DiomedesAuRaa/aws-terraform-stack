@@ -71,6 +71,7 @@ jobs:
       - name: Terraform Apply
         working-directory: aws-terraform-stack/ec2
         run: terraform apply -lock=false tfplan 
+        continue-on-error: true
         if: success()  # Only runs if terraform plan was successful
 
       - name: Terraform Plan - 2 (BAD PRACTICE)

@@ -10,7 +10,7 @@ variable "ecs_cluster_name" {
 
 variable "ecs_task_family" {
   description = "The family name of the ECS task."
-  default     = "julian-au-bellona"
+  default     = "julian-au-bellona-test"
 }
 
 variable "ecs_service_name" {

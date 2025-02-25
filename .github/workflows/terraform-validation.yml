@@ -1,0 +1,71 @@
+name: Terraform Validation
+
+on:
+  pull_request:
+    branches:
+      - main  # Replace with your default branch (e.g., master, main)
+    paths:
+      - '**/*.tf'  # Trigger when any Terraform file is changed
+
+jobs:
+  terraform:
+    name: Validate Terraform
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        directory: ['ECS', 'RDS', 'S3', 'EKS', 'EC2']  # List all your directories here
+      fail-fast: false  # Continue running even if one directory fails
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Terraform
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0  # Replace with your desired Terraform version
+
+      # Initialize Terraform
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./${{ matrix.directory }}
+
+      # Validate Terraform configuration
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: ./${{ matrix.directory }}
+
+      # Format Terraform files
+      - name: Terraform Format
+        run: terraform fmt -check -recursive
+        working-directory: ./${{ matrix.directory }}
+        id: fmt
+
+      # Lint Terraform files using TFLint
+      - name: Install TFLint
+        run: |
+          curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+
+      - name: Run TFLint
+        run: tflint
+        working-directory: ./${{ matrix.directory }}
+
+      # Generate Terraform Plan
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+        working-directory: ./${{ matrix.directory }}
+
+      # Optionally, upload the plan as an artifact for review
+      - name: Upload Terraform Plan
+        uses: actions/upload-artifact@v3
+        with:
+          name: tfplan-${{ matrix.directory }}
+          path: ./${{ matrix.directory }}/tfplan
+
+      # Fail if any of the above steps fail
+      - name: Check for Failures
+        if: ${{ failure() }}
+        run: exit 1

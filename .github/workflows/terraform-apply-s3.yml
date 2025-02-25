@@ -75,5 +75,5 @@ jobs:
 
       - name: Terraform Test
         working-directory: aws-terraform-stack/s3
-        run: terraform test -lock=false 
+        run: terraform test
         if: success()

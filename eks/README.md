@@ -92,4 +92,6 @@ terraform destroy -auto-approve
 
 ---
 
-This setup will deploy a production-ready Amazon EKS cluster with Terraform. Modify the configuration files as needed to suit your infrastructure requirements.
+## TODO
+
+- right now the state locking is a bit jacked up, so i have lock set to false. Which isnt great, at scale this would be bad. 

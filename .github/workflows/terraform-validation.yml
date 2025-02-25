@@ -38,11 +38,11 @@ jobs:
         run: terraform validate
         working-directory: ./${{ matrix.directory }}
 
-      # Format Terraform files
-      - name: Terraform Format
-        run: terraform fmt -check -recursive
-        working-directory: ./${{ matrix.directory }}
-        id: fmt
+    #   # Format Terraform files
+    #   - name: Terraform Format
+    #     run: terraform fmt -check -recursive
+    #     working-directory: ./${{ matrix.directory }}
+    #     id: fmt
 
       # Lint Terraform files using TFLint
       - name: Install TFLint

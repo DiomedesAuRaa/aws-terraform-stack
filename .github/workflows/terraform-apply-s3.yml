@@ -71,4 +71,9 @@ jobs:
       - name: Terraform Apply
         working-directory: aws-terraform-stack/s3
         run: terraform apply -lock=false tfplan 
-        if: success()  # Only runs if terraform plan was successful
+        if: success()  
+
+      - name: Terraform Test
+        working-directory: aws-terraform-stack/s3
+        run: terraform test -lock=false 
+        if: success()

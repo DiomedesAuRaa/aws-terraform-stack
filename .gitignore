@@ -1,0 +1,27 @@
+# Ignore all .sh scripts 
+*.sh
+
+# Terraform state files
+*.tfstate
+*.tfstate.backup
+terraform.tfstate.d/
+.terraform.tfstate.lock.info
+
+# Terraform crash logs
+crash.log
+
+# Ignore Terraform provider plugins
+.terraform/
+.terraform.lock.hcl
+*.tfvars
+
+# Ignore environment variable files
+.env
+
+# Ignore sensitive AWS credentials (if any)
+.aws/
+
+# Ignore IDE-specific files
+.vscode/
+.idea/
+*.swp

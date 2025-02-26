@@ -1,0 +1,62 @@
+name: Terraform Validation
+
+on:
+  pull_request:
+    branches:
+      - main  
+    paths:
+      - 'aws-terraform-stack/**/*.tf'  
+
+jobs:
+  terraform:
+    name: Validate Terraform
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        directory: ['rds', 'ecs', 's3', 'eks', 'ec2']  
+      fail-fast: false  
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0  
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: aws-terraform-stack/${{ matrix.directory }}
+
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: aws-terraform-stack/${{ matrix.directory }}
+
+    #   - name: Terraform Format
+    #     run: terraform fmt -check -recursive
+    #     working-directory: aws-terraform-stack/{{ matrix.directory }}
+    #     id: fmt
+
+      - name: Install TFLint
+        run: |
+          curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+
+      - name: Run TFLint
+        run: tflint
+        working-directory: aws-terraform-stack/${{ matrix.directory }}
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+        working-directory: aws-terraform-stack/${{ matrix.directory }}
+
+      - name: Upload Terraform Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-${{ matrix.directory }}
+          path: aws-terraform-stack/${{ matrix.directory }}/tfplan
+
+      - name: Check for Failures
+        if: ${{ failure() }}
+        run: exit 1

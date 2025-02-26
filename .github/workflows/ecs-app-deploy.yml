@@ -1,0 +1,145 @@
+name: Build, Push to ECR, and Deploy to ECS
+
+on:
+  repository_dispatch:
+    types: [trigger-workflow]
+
+env:
+  AWS_REGION: us-east-1
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+  ECR_REPOSITORY: mood-gif-app
+  ECS_CLUSTER: cassius-au-bellona-prod
+  ECS_TASK_FAMILY: mood-gif-task
+  ECS_SERVICE: mood-gif-service
+  CONTAINER_NAME: gif-mood-generator
+  DOCKER_IMAGE_TAG: latest
+
+jobs:
+  build-and-push-to-ecr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout gif-mood-generator repository
+        uses: actions/checkout@v3
+        with:
+          repository: DiomedesAuRaa/gif-mood-generator
+          ref: main  
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ env.ECR_REPOSITORY }}:${{ env.DOCKER_IMAGE_TAG }} .
+      - name: Tag Docker image
+        run: |
+          docker tag ${{ env.ECR_REPOSITORY }}:${{ env.DOCKER_IMAGE_TAG }} \
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.DOCKER_IMAGE_TAG }}
+      - name: Push Docker image to ECR
+        run: |
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.DOCKER_IMAGE_TAG }}
+  deploy-to-ecs:
+    runs-on: ubuntu-latest
+    needs: build-and-push-to-ecr
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set ECR_IMAGE_URL
+        id: set-ecr-image-url
+        run: |
+          echo "ECR_IMAGE_URL=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.DOCKER_IMAGE_TAG }}" >> $GITHUB_ENV
+          
+      - name: Get current task definition
+        id: get-task-definition
+        run: |
+            TASK_DEFINITION=$(aws ecs describe-task-definition \
+              --task-definition ${{ env.ECS_TASK_FAMILY }} \
+              --region ${{ env.AWS_REGION }} \
+              --query 'taskDefinition' \
+              --output json)
+            echo "$TASK_DEFINITION" > task_definition.json
+  
+      - name: Update ECS task definition
+        id: update-task-definition
+        run: |
+                  TASK_DEFINITION=$(cat task_definition.json)
+                  IMAGE="${{ env.ECR_IMAGE_URL }}"
+                  EXECUTION_ROLE_ARN="arn:aws:iam::122610514415:role/ecs_task_execution_role"  # Ensure this is correct
+                  CONTAINER_NAME="${{ env.CONTAINER_NAME }}"  # Ensure the container name is correctly set
+                  MEMORY="512"  # Set the memory size (in MiB)
+                  CPU="256"  # Set the CPU size (in CPU units)
+                  GIPHY_SECRET_ARN="arn:aws:secretsmanager:us-east-1:122610514415:secret:giphy_api_key-2gTXDG"  # Secret ARN
+                  
+                  echo "ECR image URL: $IMAGE"
+                  
+                  NEW_TASK_DEFINITION=$(echo "$TASK_DEFINITION" | jq \
+                    --arg IMAGE "$IMAGE" \
+                    --arg EXECUTION_ROLE_ARN "$EXECUTION_ROLE_ARN" \
+                    --arg CONTAINER_NAME "$CONTAINER_NAME" \
+                    --arg MEMORY "$MEMORY" \
+                    --arg CPU "$CPU" \
+                    --arg GIPHY_SECRET_ARN "$GIPHY_SECRET_ARN" \
+                    '.taskDefinition |
+                      .containerDefinitions[0].name = $CONTAINER_NAME |
+                      .containerDefinitions[0].image = $IMAGE |
+                      .containerDefinitions[0].memory = ($MEMORY | tonumber) |
+                      .containerDefinitions[0].cpu = ($CPU | tonumber) |
+                      .containerDefinitions[0].portMappings = [{"containerPort": 5000, "protocol": "tcp"}] |
+                      .containerDefinitions[0].secrets = [{
+                        "name": "GIPHY_API_KEY", 
+                        "valueFrom": $GIPHY_SECRET_ARN
+                      }] |
+                      .executionRoleArn = $EXECUTION_ROLE_ARN |
+                      .requiresCompatibilities = ["FARGATE"] |
+                      .networkMode = "awsvpc" |
+                      .cpu = $CPU |
+                      .memory = $MEMORY |
+                      del(.taskDefinitionArn) |
+                      del(.revision) |
+                      del(.status) |
+                      del(.requiresAttributes) |
+                      del(.registeredAt) |
+                      del(.registeredBy)')
+                  
+                  aws ecs register-task-definition \
+                    --family ${{ env.ECS_TASK_FAMILY }} \
+                    --cli-input-json "$NEW_TASK_DEFINITION" \
+                    --region ${{ env.AWS_REGION }}
+
+      - name: Update ECS service
+        run: |
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${{ env.ECS_SERVICE }} \
+            --task-definition ${{ env.ECS_TASK_FAMILY }} \
+            --force-new-deployment \
+            --region ${{ env.AWS_REGION }}
+
+      # Discord Notifications
+      - name: Notify Discord on Success
+        if: success()
+        run: |
+          curl -X POST \
+            -H "Content-Type: application/json" \
+            -d '{"content": "✅ **ECS App Deploy  Workflow Succeeded!**\n\nRepository: ${{ github.repository }}\nWorkflow: ${{ github.workflow }}\nRun ID: ${{ github.run_id }}\nView run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}' \
+            ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+      - name: Notify Discord on Failure
+        if: failure()
+        run: |
+          curl -X POST \
+            -H "Content-Type: application/json" \
+            -d '{"content": "❌ **ECS App Deploy Workflow Failed!**\n\nRepository: ${{ github.repository }}\nWorkflow: ${{ github.workflow }}\nRun ID: ${{ github.run_id }}\nView run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}' \
+            ${{ secrets.DISCORD_WEBHOOK_URL }}                            

@@ -2,10 +2,6 @@ provider "aws" {
   region = var.aws_region
 }
 
-provider "aws" {
-  region = var.aws_region
-}
-
 # Use existing VPC
 data "aws_vpc" "existing_vpc" {
   id = "vpc-0eea538efbaee7afd"

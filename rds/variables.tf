@@ -70,14 +70,14 @@ variable "db_storage_type" {
   default     = "gp2"
 }
 
-variable "db_username_secret_name" {
-  description = "The name of the AWS Secrets Manager secret storing the DB password"
+variable "db_password_secret_name" {
+  description = "The name or ARN of the secret in AWS Secrets Manager that contains the RDS database password"
   type        = string
-  # default     = "rds-username"
+  default     = "rds-password"  
 }
 
-variable "db_password_secret_name" {
-  description = "The name of the AWS Secrets Manager secret storing the DB password"
+variable "db_username_secret_name" {
+  description = "The name or ARN of the secret in AWS Secrets Manager that contains the RDS database username"
   type        = string
-  # default     = "rds-password"
+  default     = "rds-username"  
 }

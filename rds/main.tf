@@ -49,16 +49,18 @@ data "aws_internet_gateway" "existing_gw" {
   }
 }
 
-# Reference the existing Internet Gateway
-resource "aws_internet_gateway" "gw" {
+# IGW in a route table
+resource "aws_route_table" "public" {
   vpc_id = data.aws_vpc.existing_vpc.id
 
-  tags = {
-    Name = "Main IGW"
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = data.aws_internet_gateway.existing_gw.id
   }
 
-  # Use the existing IGW ID
-  id = data.aws_internet_gateway.existing_gw.id
+  tags = {
+    Name = "Public Route Table"
+  }
 }
 
 # Create a route table for public traffic

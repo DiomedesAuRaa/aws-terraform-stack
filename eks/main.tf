@@ -25,8 +25,7 @@ resource "aws_security_group" "eks_sg" {
 # EKS Module
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "~> 19.0"
-
+  version = "20.33.0"
   cluster_name    = "iron-gold-eks"
   cluster_version = "1.31"
   subnet_ids      = module.vpc.private_subnets
@@ -44,14 +43,5 @@ module "eks" {
       instance_types = ["t3.medium"]
       capacity_type  = "ON_DEMAND"
     }
-  }
-}
-
-# Override the aws_cloudwatch_log_group resource
-resource "aws_cloudwatch_log_group" "eks_log_group" {
-  name = "/aws/eks/iron-gold-eks/cluster"
-
-  lifecycle {
-    create_before_destroy = true
   }
 }

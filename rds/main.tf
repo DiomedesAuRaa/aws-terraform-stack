@@ -2,20 +2,18 @@ provider "aws" {
   region = var.aws_region
 }
 
-# 🚀 Create a VPC
-resource "aws_vpc" "main_vpc" {
-  cidr_block           = var.vpc_cidr_block
-  enable_dns_support   = true
-  enable_dns_hostnames = true
-
-  tags = {
-    Name = "Production VPC"
-  }
+provider "aws" {
+  region = var.aws_region
 }
 
-# 🚀 Create public subnet
+# Use existing VPC
+data "aws_vpc" "existing_vpc" {
+  id = "vpc-0eea538efbaee7afd"
+}
+
+# Create public subnet
 resource "aws_subnet" "public_subnet" {
-  vpc_id                  = aws_vpc.main_vpc.id
+  vpc_id                  = data.aws_vpc.existing_vpc.id
   cidr_block              = var.public_subnet_cidr
   map_public_ip_on_launch = true
   availability_zone       = "${var.aws_region}a"
@@ -25,9 +23,9 @@ resource "aws_subnet" "public_subnet" {
   }
 }
 
-# 🚀 Create first private subnet
+# Create first private subnet
 resource "aws_subnet" "private_subnet" {
-  vpc_id            = aws_vpc.main_vpc.id
+  vpc_id            = data.aws_vpc.existing_vpc.id
   cidr_block        = var.private_subnet_cidr
   availability_zone = "${var.aws_region}b"
 
@@ -36,9 +34,9 @@ resource "aws_subnet" "private_subnet" {
   }
 }
 
-# 🚀 Create second private subnet in a different AZ
+# Create second private subnet in a different AZ
 resource "aws_subnet" "private_subnet_2" {
-  vpc_id            = aws_vpc.main_vpc.id
+  vpc_id            = data.aws_vpc.existing_vpc.id
   cidr_block        = var.private_subnet_cidr_2
   availability_zone = "${var.aws_region}a"
 
@@ -47,18 +45,18 @@ resource "aws_subnet" "private_subnet_2" {
   }
 }
 
-# 🚀 Create an Internet Gateway for public access
+# Create an Internet Gateway for public access
 resource "aws_internet_gateway" "gw" {
-  vpc_id = aws_vpc.main_vpc.id
+  vpc_id = data.aws_vpc.existing_vpc.id
 
   tags = {
     Name = "Main IGW"
   }
 }
 
-# 🚀 Create a route table for public traffic
+# Create a route table for public traffic
 resource "aws_route_table" "public_rt" {
-  vpc_id = aws_vpc.main_vpc.id
+  vpc_id = data.aws_vpc.existing_vpc.id
 
   route {
     cidr_block = "0.0.0.0/0"
@@ -70,15 +68,15 @@ resource "aws_route_table" "public_rt" {
   }
 }
 
-# 🚀 Associate public subnet with the public route table
+# Associate public subnet with the public route table
 resource "aws_route_table_association" "public_assoc" {
   subnet_id      = aws_subnet.public_subnet.id
   route_table_id = aws_route_table.public_rt.id
 }
 
-# 🚀 Create a security group for RDS
+# Create a security group for RDS
 resource "aws_security_group" "rds_sg" {
-  vpc_id = aws_vpc.main_vpc.id
+  vpc_id = data.aws_vpc.existing_vpc.id
 
   ingress {
     from_port   = 5432
@@ -99,7 +97,7 @@ resource "aws_security_group" "rds_sg" {
   }
 }
 
-# 🚀 Retrieve DB password from AWS Secrets Manager
+# Retrieve DB password from AWS Secrets Manager
 data "aws_secretsmanager_secret_version" "db_password" {
   secret_id = var.db_password_secret_name
 }
@@ -108,7 +106,7 @@ data "aws_secretsmanager_secret_version" "db_username" {
   secret_id = var.db_username_secret_name
 }
 
-# 🚀 Create an RDS Instance
+# Create an RDS Instance
 resource "aws_db_instance" "production_db" {
   identifier        = var.db_instance_identifier
   db_name           = var.db_name
@@ -136,7 +134,7 @@ resource "aws_db_instance" "production_db" {
   }
 }
 
-# 🚀 Create a subnet group for RDS across two AZs
+# Create a subnet group for RDS across two AZs
 resource "aws_db_subnet_group" "rds_subnet_group" {
   name = "rds-subnet-group"
   subnet_ids = [

@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "my_bucket" {
-  bucket = "tf-created-tactus-au-rath"
+  bucket = "tactus-au-rath"
   acl    = "private"
 
   server_side_encryption_configuration {

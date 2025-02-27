@@ -28,7 +28,7 @@ module "eks" {
   version = "~> 19.0"
 
   cluster_name    = "iron-gold-eks"
-  cluster_version = "1.30"
+  cluster_version = "1.31"
   subnet_ids      = module.vpc.private_subnets
   vpc_id          = module.vpc.vpc_id
 

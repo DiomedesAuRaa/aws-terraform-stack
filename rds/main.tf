@@ -41,13 +41,24 @@ resource "aws_subnet" "private_subnet_2" {
   }
 }
 
-# Create an Internet Gateway for public access
+# Data source to find the existing Internet Gateway
+data "aws_internet_gateway" "existing_gw" {
+  filter {
+    name   = "attachment.vpc-id"
+    values = [data.aws_vpc.existing_vpc.id]
+  }
+}
+
+# Reference the existing Internet Gateway
 resource "aws_internet_gateway" "gw" {
   vpc_id = data.aws_vpc.existing_vpc.id
 
   tags = {
     Name = "Main IGW"
   }
+
+  # Use the existing IGW ID
+  id = data.aws_internet_gateway.existing_gw.id
 }
 
 # Create a route table for public traffic
@@ -56,7 +67,7 @@ resource "aws_route_table" "public_rt" {
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.gw.id
+    gateway_id = data.aws_internet_gateway.existing_gw.id
   }
 
   tags = {

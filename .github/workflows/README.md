@@ -24,3 +24,7 @@ This repository contains GitHub Actions workflows to apply and destroy infrastru
 - **`terraform-apply-ecs.yml`**: This workflow applies the Terraform configuration to create or update the AWS ECS environment.
 - **`terraform-destroy-ecs.yml`**: This workflow destroys the AWS ECS environment managed by Terraform.
 
+### S3 Environment Workflows
+
+- **`terraform-apply-s3.yml`**: This workflow applies the Terraform configuration to create or update the AWS S3 environment.
+- **`terraform-destroy-s3.yml`**: This workflow destroys the AWS S3 environment managed by Terraform.

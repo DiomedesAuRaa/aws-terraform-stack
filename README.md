@@ -96,7 +96,7 @@ To use the workflows, you must configure the following secrets in your GitHub re
 
 ### Steps to Add Secrets
 
-1. Go to your GitHub repository.
+1. Go to your GitHub repo.
 2. Navigate to **Settings** > **Secrets and variables** > **Actions**.
 3. Click **New repository secret**.
 4. Add each of the secrets listed above with their corresponding values.

@@ -29,12 +29,12 @@ This repository contains Terraform code to create an S3 bucket with the followin
 
 ```
 .
-├── s3.tf                # Terraform configuration for the S3 bucket
-├── outputs.tf             # Outputs for bucket name and configuration
-├── tests/                 # Directory for automated tests
-│   └── bucket_test.tf     # Terraform test file (requires Terraform 1.6.0+)
-├── backend.tf             # Backend config for state storage
-└── README.md              # This file
+├── s3.tf                          # Terraform configuration for the S3 bucket
+├── outputs.tf                     # Outputs for bucket name and configuration
+├── tests/                         # Directory for automated tests
+│   └── bucket_test.tftest.hcl     # Terraform test file (requires Terraform 1.6.0+)
+├── backend.tf                     # Backend config for state storage
+└── README.md                      # This file
 ```
 
 ---

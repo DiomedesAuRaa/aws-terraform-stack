@@ -18,13 +18,13 @@ locals {
 
 resource "aws_launch_template" "ec2_template" {
   name_prefix   = "ec2-farm"
-  image_id      = "ami-0062355a529d6089c" # Replace with your desired AMI ID
-  instance_type = var.instance_type       # Use the instance type passed from the root module
-  key_name      = "my-key"                # Replace with your key pair name
+  image_id      = "ami-0062355a529d6089c" 
+  instance_type = var.instance_type       
+  key_name      = "my-key"              
 
   network_interfaces {
     associate_public_ip_address = true
-    security_groups             = [var.security_group_id] # Use the security group ID passed from the root module
+    security_groups             = [var.security_group_id]
   }
 }
 

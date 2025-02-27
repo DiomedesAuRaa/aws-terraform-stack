@@ -100,12 +100,3 @@ To use the workflows, you must configure the following secrets in your GitHub re
 2. Navigate to **Settings** > **Secrets and variables** > **Actions**.
 3. Click **New repository secret**.
 4. Add each of the secrets listed above with their corresponding values.
-
-## Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository.
-2. Create a new branch for your feature or bugfix.
-3. Commit your changes and push to your branch.
-4. Submit a pull request with a detailed description of your changes.

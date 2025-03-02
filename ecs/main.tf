@@ -10,21 +10,18 @@ data "aws_ssm_parameter" "ecs_ami" {
   name = "/aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id"
 }
 
-# Create Subnets
-resource "aws_subnet" "subnet_a" {
-  vpc_id                  = data.aws_vpc.existing.id
-  cidr_block              = "10.0.1.0/24"
-  availability_zone       = "us-east-1a"
-  map_public_ip_on_launch = true
-  tags                    = { Name = "ecs-subnet-a" }
+data "aws_subnet" "subnet_a" {
+  filter {
+    name   = "tag:Name"
+    values = ["ecs-subnet-a"]
+  }
 }
 
-resource "aws_subnet" "subnet_b" {
-  vpc_id                  = data.aws_vpc.existing.id
-  cidr_block              = "10.0.2.0/24"
-  availability_zone       = "us-east-1b"
-  map_public_ip_on_launch = true
-  tags                    = { Name = "ecs-subnet-b" }
+data "aws_subnet" "subnet_b" {
+  filter {
+    name   = "tag:Name"
+    values = ["ecs-subnet-b"]
+  }
 }
 
 # Log Group
@@ -141,13 +138,13 @@ resource "aws_ecs_service" "mood_gif_service" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets          = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
+    subnets          = [data.aws_subnet.subnet_a.id, data.aws_subnet.subnet_b.id] # Use existing subnets
     security_groups  = [aws_security_group.ecs_sg.id]
     assign_public_ip = true
   }
   load_balancer {
     target_group_arn = var.target_group_arn
-    container_name   = "gif-mood-generator"  # Update this line
+    container_name   = "gif-mood-generator"  
     container_port   = 5000
   }
 }

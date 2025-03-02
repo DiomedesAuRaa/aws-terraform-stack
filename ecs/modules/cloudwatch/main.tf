@@ -1,7 +1,13 @@
+# Create the CloudWatch Log Group
+resource "aws_cloudwatch_log_group" "log_group" {
+  name = var.log_group_name
+}
+
+# Metric Filter referencing the created log group
 resource "aws_cloudwatch_log_metric_filter" "log_event_count" {
   name           = "LogEventCountFilter"
   pattern        = "[timestamp, message]"  # Match all log events
-  log_group_name = var.log_group_name
+  log_group_name = aws_cloudwatch_log_group.log_group.name  # Reference the created log group
 
   metric_transformation {
     name      = "LogEventCount" # Metric name
@@ -10,6 +16,7 @@ resource "aws_cloudwatch_log_metric_filter" "log_event_count" {
   }
 }
 
+# CloudWatch Metric Alarm referencing the created log group
 resource "aws_cloudwatch_metric_alarm" "this" {
   alarm_name          = var.alarm_name
   comparison_operator = "GreaterThanThreshold"
@@ -25,7 +32,7 @@ resource "aws_cloudwatch_metric_alarm" "this" {
   namespace  = "LogMetrics"    # Must match the namespace in the filter
 
   dimensions = {
-    LogGroupName = var.log_group_name
+    LogGroupName = aws_cloudwatch_log_group.log_group.name  # Reference the created log group
   }
 
   alarm_actions = [var.sns_topic_arn]

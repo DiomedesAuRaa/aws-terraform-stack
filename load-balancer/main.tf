@@ -2,13 +2,33 @@ provider "aws" {
   region = var.aws_region
 }
 
+# Data sources to look up subnets by name tag
+data "aws_subnet" "public_a" {
+  filter {
+    name   = "tag:Name"
+    values = ["ecs-subnet-a"]
+  }
+}
+
+data "aws_subnet" "public_b" {
+  filter {
+    name   = "tag:Name"
+    values = ["ecs-subnet-b"]
+  }
+}
+
 # Application Load Balancer (ALB)
 resource "aws_lb" "ecs_alb" {
   name               = "ecs-alb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb_sg.id]
-  subnets            = var.public_subnets
+
+  # Use dynamically fetched subnets
+  subnets = [
+    data.aws_subnet.public_a.id,
+    data.aws_subnet.public_b.id
+  ]
 }
 
 # Security Group for ALB

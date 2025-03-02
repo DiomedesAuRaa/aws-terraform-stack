@@ -110,7 +110,7 @@ resource "aws_ecs_task_definition" "mood_gif_task" {
 
   container_definitions = jsonencode([
     {
-      name         = "mood-gif-app"
+      name         = "gif-mood-generator"
       image        = "122610514415.dkr.ecr.us-east-1.amazonaws.com/mood-gif-app:latest"
       essential    = true
       portMappings = [{ containerPort = 5000, protocol = "tcp" }]

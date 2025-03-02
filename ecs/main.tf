@@ -24,12 +24,6 @@ data "aws_subnet" "subnet_b" {
   }
 }
 
-# Log Group
-resource "aws_cloudwatch_log_group" "mood_gif_app_log_group" {
-  name              = "/ecs/mood-gif-app"
-  retention_in_days = 14
-}
-
 # ECS Security Group
 resource "aws_security_group" "ecs_sg" {
   vpc_id = data.aws_vpc.existing.id

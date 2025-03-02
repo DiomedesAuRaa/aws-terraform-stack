@@ -73,6 +73,11 @@ jobs:
         run: terraform apply -lock=false tfplan 
         if: success()  # Only runs if terraform plan was successful
 
+      - name: Terraform Test
+        working-directory: aws-terraform-stack/s3
+        run: terraform test
+        if: success()
+
       # Discord Notifications
       - name: Notify Discord on Success
         if: success()

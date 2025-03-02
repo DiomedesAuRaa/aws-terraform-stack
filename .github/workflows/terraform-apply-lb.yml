@@ -1,4 +1,4 @@
-name: 'Apply load-balancer Terraform Configuration'
+name: 'Apply LB Terraform Configuration'
 
 on:
   workflow_dispatch:  # Manual trigger to apply infrastructure

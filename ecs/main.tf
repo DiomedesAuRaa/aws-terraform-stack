@@ -16,7 +16,7 @@ resource "aws_subnet" "subnet_a" {
   cidr_block              = "10.0.1.0/24"
   availability_zone       = "us-east-1a"
   map_public_ip_on_launch = true
-  tags                    = { Name = "subnet-a" }
+  tags                    = { Name = "ecs-subnet-a" }
 }
 
 resource "aws_subnet" "subnet_b" {
@@ -24,7 +24,7 @@ resource "aws_subnet" "subnet_b" {
   cidr_block              = "10.0.2.0/24"
   availability_zone       = "us-east-1b"
   map_public_ip_on_launch = true
-  tags                    = { Name = "subnet-b" }
+  tags                    = { Name = "ecs-subnet-b" }
 }
 
 # Log Group
@@ -165,5 +165,5 @@ module "cloudwatch" {
   evaluation_period = 1
   period            = 60
   sns_topic_arn     = aws_sns_topic.alerts.arn
-  log_group_name    = "/ecs/mood-gif-app" # Update to the correct log group name
+  log_group_name    = "/ecs/mood-gif-app"
 }

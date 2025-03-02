@@ -2,33 +2,24 @@ provider "aws" {
   region = var.aws_region
 }
 
-# Data sources to look up subnets by name tag
-data "aws_subnet" "public_a" {
-  filter {
-    name   = "tag:Name"
-    values = ["ecs-subnet-a"]
-  }
+data "aws_vpc" "existing" {
+  id = var.vpc_id
 }
 
-data "aws_subnet" "public_b" {
-  filter {
-    name   = "tag:Name"
-    values = ["ecs-subnet-b"]
-  }
+resource "aws_subnet" "subnet_a" {
+  vpc_id                  = data.aws_vpc.existing.id
+  cidr_block              = "10.0.1.0/24"
+  availability_zone       = "us-east-1a"
+  map_public_ip_on_launch = true
+  tags                    = { Name = "ecs-subnet-a" }
 }
 
-# Application Load Balancer (ALB)
-resource "aws_lb" "ecs_alb" {
-  name               = "ecs-alb"
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.alb_sg.id]
-
-  # Use dynamically fetched subnets
-  subnets = [
-    data.aws_subnet.public_a.id,
-    data.aws_subnet.public_b.id
-  ]
+resource "aws_subnet" "subnet_b" {
+  vpc_id                  = data.aws_vpc.existing.id
+  cidr_block              = "10.0.2.0/24"
+  availability_zone       = "us-east-1b"
+  map_public_ip_on_launch = true
+  tags                    = { Name = "ecs-subnet-b" }
 }
 
 # Security Group for ALB
@@ -50,6 +41,20 @@ resource "aws_security_group" "alb_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+}
+
+# Application Load Balancer (ALB)
+resource "aws_lb" "ecs_alb" {
+  name               = "ecs-alb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.alb_sg.id]
+
+  # Use directly created subnet IDs (not data source lookups)
+  subnets = [
+    aws_subnet.subnet_a.id,
+    aws_subnet.subnet_b.id
+  ]
 }
 
 # Target Group for ECS Services

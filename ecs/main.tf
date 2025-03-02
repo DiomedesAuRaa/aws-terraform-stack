@@ -147,7 +147,7 @@ resource "aws_ecs_service" "mood_gif_service" {
   }
   load_balancer {
     target_group_arn = var.target_group_arn
-    container_name   = "mood-gif-app"
+    container_name   = "gif-mood-generator"  # Update this line
     container_port   = 5000
   }
 }

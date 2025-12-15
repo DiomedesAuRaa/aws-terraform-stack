@@ -18,9 +18,9 @@ locals {
 
 resource "aws_launch_template" "ec2_template" {
   name_prefix   = "ec2-farm"
-  image_id      = "ami-0062355a529d6089c" 
-  instance_type = var.instance_type       
-  key_name      = "my-key"              
+  image_id      = "ami-0062355a529d6089c"
+  instance_type = var.instance_type
+  key_name      = "my-key"
 
   network_interfaces {
     associate_public_ip_address = true

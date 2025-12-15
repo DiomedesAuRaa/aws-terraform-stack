@@ -11,13 +11,13 @@ variable "threshold" {
 variable "evaluation_period" {
   description = "The number of evaluation periods before triggering the alarm."
   type        = number
-  default     = 1 # Default to 1 period unless overridden
+  default     = 1
 }
 
 variable "period" {
   description = "The time period (in seconds) over which CloudWatch collects data points."
   type        = number
-  default     = 60 #
+  default     = 60
 }
 
 variable "sns_topic_arn" {

@@ -25,7 +25,8 @@ resource "aws_security_group" "eks_sg" {
 # EKS Module
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "20.33.0"
+  version = "~> 20.31"
+
   cluster_name    = "iron-gold-eks"
   cluster_version = "1.31"
   subnet_ids      = module.vpc.private_subnets

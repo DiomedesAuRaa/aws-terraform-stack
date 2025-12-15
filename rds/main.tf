@@ -49,20 +49,6 @@ data "aws_internet_gateway" "existing_gw" {
   }
 }
 
-# IGW in a route table
-resource "aws_route_table" "public" {
-  vpc_id = data.aws_vpc.existing_vpc.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = data.aws_internet_gateway.existing_gw.id
-  }
-
-  tags = {
-    Name = "Public Route Table"
-  }
-}
-
 # Create a route table for public traffic
 resource "aws_route_table" "public_rt" {
   vpc_id = data.aws_vpc.existing_vpc.id
@@ -91,7 +77,7 @@ resource "aws_security_group" "rds_sg" {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # ⚠️ Change this to a more restricted range for security
+    cidr_blocks = ["10.0.0.0/16"] # Restrict to VPC CIDR for better security
   }
 
   egress {
@@ -132,8 +118,7 @@ resource "aws_db_instance" "production_db" {
   storage_encrypted       = true
   deletion_protection     = false
   publicly_accessible     = false
-  # final_snapshot_identifier = "production-db-final-snapshot"
-  skip_final_snapshot = true
+  skip_final_snapshot     = true
 
   vpc_security_group_ids = [aws_security_group.rds_sg.id]
   db_subnet_group_name   = aws_db_subnet_group.rds_subnet_group.name

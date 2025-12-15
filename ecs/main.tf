@@ -132,13 +132,14 @@ resource "aws_ecs_service" "mood_gif_service" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets          = [data.aws_subnet.subnet_a.id, data.aws_subnet.subnet_b.id] # Use existing subnets
+    subnets          = [data.aws_subnet.subnet_a.id, data.aws_subnet.subnet_b.id]
     security_groups  = [aws_security_group.ecs_sg.id]
     assign_public_ip = true
   }
+
   load_balancer {
     target_group_arn = var.target_group_arn
-    container_name   = "gif-mood-generator"  
+    container_name   = "gif-mood-generator"
     container_port   = 5000
   }
 }
